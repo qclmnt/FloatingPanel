@@ -12,6 +12,7 @@ class FloatingPanelCore: NSObject, UIGestureRecognizerDelegate {
     // MUST be a weak reference to prevent UI freeze on the presentation modally
     weak var viewcontroller: FloatingPanelController?
 
+    let topView: UIView
     let surfaceView: FloatingPanelSurfaceView
     let backdropView: FloatingPanelBackdropView
     var layoutAdapter: FloatingPanelLayoutAdapter
@@ -59,6 +60,8 @@ class FloatingPanelCore: NSObject, UIGestureRecognizerDelegate {
 
     init(_ vc: FloatingPanelController, layout: FloatingPanelLayout, behavior: FloatingPanelBehavior) {
         viewcontroller = vc
+        
+        self.topView = UIView()
 
         surfaceView = FloatingPanelSurfaceView()
         surfaceView.backgroundColor = .white
@@ -69,7 +72,8 @@ class FloatingPanelCore: NSObject, UIGestureRecognizerDelegate {
 
         self.layoutAdapter = FloatingPanelLayoutAdapter(surfaceView: surfaceView,
                                                         backdropView: backdropView,
-                                                        layout: layout)
+                                                        layout: layout,
+                                                        topView: topView)
         self.behavior = behavior
 
         panGestureRecognizer = FloatingPanelPanGestureRecognizer()
