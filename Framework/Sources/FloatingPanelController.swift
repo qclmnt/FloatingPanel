@@ -130,6 +130,10 @@ open class FloatingPanelController: UIViewController {
             didUpdateDelegate()
         }
     }
+    
+    public var topView: UIView! {
+        return floatingPanel.topView
+    }
 
     /// Returns the surface view managed by the controller object. It's the same as `self.view`.
     public var surfaceView: FloatingPanelSurfaceView! {
@@ -241,6 +245,9 @@ open class FloatingPanelController: UIViewController {
 
         backdropView.frame = view.bounds
         view.addSubview(backdropView)
+        
+        topView.frame = view.bounds
+        view.addSubview(topView)
 
         surfaceView.frame = view.bounds
         view.addSubview(surfaceView)

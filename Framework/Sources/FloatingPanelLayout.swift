@@ -164,6 +164,7 @@ struct LayoutSegment {
 
 class FloatingPanelLayoutAdapter {
     weak var vc: FloatingPanelController!
+    private weak var topView: UIView!
     private weak var surfaceView: FloatingPanelSurfaceView!
     private weak var backdropView: FloatingPanelBackdropView!
 
@@ -275,10 +276,11 @@ class FloatingPanelLayoutAdapter {
 
     var intrinsicHeight: CGFloat = 0.0
 
-    init(surfaceView: FloatingPanelSurfaceView, backdropView: FloatingPanelBackdropView, layout: FloatingPanelLayout) {
+    init(surfaceView: FloatingPanelSurfaceView, backdropView: FloatingPanelBackdropView, layout: FloatingPanelLayout, topView: UIView) {
         self.layout = layout
         self.surfaceView = surfaceView
         self.backdropView = backdropView
+        self.topView = topView
     }
 
     func updateIntrinsicHeight() {
@@ -372,6 +374,12 @@ class FloatingPanelLayoutAdapter {
             surfaceView.topAnchor.constraint(equalTo:vc.view.bottomAnchor,
                                              constant: -hiddenInset),
         ]
+        
+        self.topView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint(item: topView, attribute: .bottom, relatedBy: .equal, toItem: self.surfaceView, attribute: .top, multiplier: 1, constant: 0).isActive = true
+        NSLayoutConstraint(item: topView, attribute: .leading, relatedBy: .equal, toItem: self.surfaceView, attribute: .leading, multiplier: 1, constant: 0).isActive = true
+        NSLayoutConstraint(item: topView, attribute: .trailing, relatedBy: .equal, toItem: self.surfaceView, attribute: .trailing, multiplier: 1, constant: 0).isActive = true
+        NSLayoutConstraint(item: topView, attribute: .top, relatedBy: .equal, toItem: self.vc.view, attribute: .top, multiplier: 1, constant: 0).isActive = true
     }
 
     func startInteraction(at state: FloatingPanelPosition, offset: CGPoint = .zero) {
