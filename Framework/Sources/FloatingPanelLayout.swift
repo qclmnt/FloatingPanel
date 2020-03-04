@@ -297,7 +297,7 @@ class FloatingPanelLayoutAdapter {
                 intrinsicHeight -= safeAreaInsets.bottom
             }
         }
-        self.intrinsicHeight = max(intrinsicHeight, 0.0)
+        self.intrinsicHeight = max(intrinsicHeight, self.layout.insetFor(position: .full) ?? 0)
 
         log.debug("Update intrinsic height =", intrinsicHeight,
                   ", surface(height) =", surfaceView.frame.height,
@@ -374,9 +374,11 @@ class FloatingPanelLayoutAdapter {
             surfaceView.topAnchor.constraint(equalTo:vc.view.bottomAnchor,
                                              constant: -hiddenInset),
         ]
-        
+
         self.topView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint(item: topView, attribute: .bottom, relatedBy: .equal, toItem: self.surfaceView, attribute: .top, multiplier: 1, constant: 0).isActive = true
+        let topViewBottomConstraint = NSLayoutConstraint(item: topView, attribute: .bottom, relatedBy: .equal, toItem: self.surfaceView, attribute: .top, multiplier: 1, constant: 0)
+        topViewBottomConstraint.priority = UILayoutPriority(rawValue: 999)
+        topViewBottomConstraint.isActive = true
         NSLayoutConstraint(item: topView, attribute: .leading, relatedBy: .equal, toItem: self.surfaceView, attribute: .leading, multiplier: 1, constant: 0).isActive = true
         NSLayoutConstraint(item: topView, attribute: .trailing, relatedBy: .equal, toItem: self.surfaceView, attribute: .trailing, multiplier: 1, constant: 0).isActive = true
         NSLayoutConstraint(item: topView, attribute: .top, relatedBy: .equal, toItem: self.vc.view, attribute: .top, multiplier: 1, constant: 0).isActive = true
@@ -439,7 +441,7 @@ class FloatingPanelLayoutAdapter {
         case is FloatingPanelIntrinsicLayout:
             heightConstraint = surfaceView.heightAnchor.constraint(equalToConstant: intrinsicHeight + safeAreaInsets.bottom)
         default:
-            let const = -(positionY(for: topMostState))
+            let const = max(12, -positionY(for: topMostState)) // 12 is a hack because the surface view is y = -12 🤷🏻‍♂️
             heightConstraint =  surfaceView.heightAnchor.constraint(equalTo: vc.view.heightAnchor,
                                                                     constant: const)
         }
@@ -461,7 +463,7 @@ class FloatingPanelLayoutAdapter {
             case .fromSuperview:
                 ret = topY
             }
-            return max(ret, 0.0) // The top boundary is equal to the related topAnchor.
+            return max(ret, self.layout.insetFor(position: .full) ?? 0) // The top boundary is equal to the related topAnchor.
         }()
         let bottomMostConst: CGFloat = {
             var ret: CGFloat = 0.0
@@ -528,9 +530,22 @@ class FloatingPanelLayoutAdapter {
             state = layout.initialPosition
         }
 
+        // Flexible surface constraints for full, half, tip and off
+        let topAnchor: NSLayoutYAxisAnchor = {
+            if layout.positionReference == .fromSuperview {
+                return vc.view.topAnchor
+            } else {
+                return vc.layoutGuide.topAnchor
+            }
+        }()
+
         NSLayoutConstraint.deactivate(fullConstraints + halfConstraints + tipConstraints + offConstraints)
         switch state {
         case .full:
+            fullConstraints = [
+                surfaceView.topAnchor.constraint(equalTo: topAnchor,
+                                                 constant: self.layout.insetFor(position: .full) ?? 0),
+            ]
             NSLayoutConstraint.activate(fullConstraints)
         case .half:
             NSLayoutConstraint.activate(halfConstraints)
