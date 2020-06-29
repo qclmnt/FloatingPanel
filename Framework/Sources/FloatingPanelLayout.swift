@@ -441,7 +441,7 @@ class FloatingPanelLayoutAdapter {
         case is FloatingPanelIntrinsicLayout:
             heightConstraint = surfaceView.heightAnchor.constraint(equalToConstant: intrinsicHeight + safeAreaInsets.bottom)
         default:
-            let const = max(12, -positionY(for: topMostState)) // 12 is a hack because the surface view is y = -12 🤷🏻‍♂️
+            let const = -positionY(for: topMostState)
             heightConstraint =  surfaceView.heightAnchor.constraint(equalTo: vc.view.heightAnchor,
                                                                     constant: const)
         }
